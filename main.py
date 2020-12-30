@@ -94,21 +94,18 @@ def applicaLogo():
 
 
 root = tk.Tk()
+root.iconbitmap('logo.ico')
 root.minsize(500, 500)
-root.title("Aggiungi logo")
+root.title("Hallmark")
 
 frm_main = tk.Frame(root, width=300, height=300)
 
-btn_openLogo = tk.Button(
-    frm_main, width=30, text="Scegli Logo", anchor='n', command=scegliLogo)
+btn_openLogo = tk.Button(frm_main, width=30, text="Scegli Logo", anchor='n', command=scegliLogo)
 lbl_logoPath = tk.Label(frm_main, anchor='n')
-btn_scegliCartella = tk.Button(
-    frm_main, width=30, text="Scegli Cartella", anchor='n', command=scegliCartella)
+btn_scegliCartella = tk.Button(frm_main, width=30, text="Scegli Cartella", anchor='n', command=scegliCartella)
 lbl_folderPath = tk.Label(frm_main)
-btn_convert = tk.Button(
-    frm_main, width=30, text="Aggiungi Logo", anchor='n', command=applicaLogo)
-pgr_bar = ttk.Progressbar(
-    master=frm_main, orient=tk.HORIZONTAL, length=100, mode='determinate')
+btn_convert = tk.Button(frm_main, width=30, text="Aggiungi Logo", anchor='n', command=applicaLogo)
+pgr_bar = ttk.Progressbar(master=frm_main, orient=tk.HORIZONTAL, length=100, mode='determinate')
 txt_log = tk.Text(frm_main, height=100)
 
 frm_main.pack(expand=True, fill='both')
