@@ -1,0 +1,39 @@
+{
+  "ext": [".png", ".jpg", "jpeg", ".mp4"],
+  "lang": {
+    "en": {
+      "dst_dir_name": "with_logo",
+      "btn1": "Choose the Logo",
+      "btn2": "Choose the directory",
+      "btn3": "Start the job",
+      "lbl1": "",
+      "lbl2": "",
+      "msg1": "No suitable file found. Supported format are: ",
+      "msg2": "Processing: ",
+      "msg3": "The width of the video is smaller than that of the logo: ",
+      "msg4": "The heigh of the video is smaller than that of the logo: ",
+      "msg5": "The width of the image is smaller than that of the logo: ",
+      "msg6": "The heigh of the image is smaller than that of the logo: ",
+      "msg7": "The image has been saved to: ",
+      "msg8": "The video has been saved to: ",
+      "msg9": "Job is over. The directory where the trasformed files have been saved is: "
+    },
+    "it": {
+      "dst_dir_name": "con_logo",
+      "btn1": "Scegli il logo",
+      "btn2": "Scegli la cartella",
+      "btn3": "Applica il logo",
+      "lbl1": "",
+      "lbl2": "",
+      "msg1": "Nessun file idoneo trovato. I formati supportati sono: ",
+      "msg2": "Sto processando: ",
+      "msg3": "La larghezza del video e' minore di quella del logo: ",
+      "msg4": "L'altezza del video e' minore di quella del logo: ",
+      "msg5": "La larghezza dell'immagine e' minore di quella del logo: ",
+      "msg6": "L'altezza dell'immagine e' minore di quella del logo: ",
+      "msg7": "L'immagine e' stata salvata in: ",
+      "msg8": "Il video e' stato salvato in: ",
+      "msg9": "Lavoro terminato. La cartella dove i file con il logo sono stati salvati e': "
+    }
+  }
+}
