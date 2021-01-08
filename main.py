@@ -1,8 +1,13 @@
+import sys
+import traceback
 import os
 import math
 import json
 import _thread
 from os.path import split
+from traceback import print_exception, print_stack
+from moviepy.video.VideoClip import ImageClip
+import numpy as np
 from PIL import ImageTk, Image
 from moviepy import *
 import moviepy.editor as mp
@@ -50,15 +55,9 @@ def attachLogo():
     pgr_bar['value'] = 0
 
     if not ('logo_filepath' in globals() and logo_filepath != '' and 'src_dir_path' in globals() and src_dir_path != ''):
-        return False    
-
-    try:
-        os.makedirs(dst_dir_path, exist_ok=True)
-    except Exception as e:
-        txt_log.insert(tk.END, e)
         return False
 
-    files = list(filter(lambda a: (a.lower().endswith(ext) and a != logo_filepath), os.listdir(src_dir_path)))
+    files = list(filter(lambda a: (a.lower().endswith(ext) and a != logo_filepath.split('/')[-1]), os.listdir(src_dir_path)))
     unit = math.floor(100 / len(files))
 
     if unit == 0:
@@ -66,55 +65,83 @@ def attachLogo():
         return False
 
     def convertMediaFiles():
-        for file in files:
-            src_filepath = src_dir_path + '/' + file
-            dst_filepath = dst_dir_path + '/' + file
-            txt_log.insert(tk.END, addLine(lang['msg2'] + src_filepath))
-            logoImg = Image.open(logo_filepath)
-            logoWidth, logoHeight = logoImg.size
+        try:
+            # create the destination directory
+            os.makedirs(dst_dir_path, exist_ok=True)
 
-            if file.lower().endswith('.mp4'):
-                video = mp.VideoFileClip(src_filepath)
-                vW, vH = video.size
-                if vW <= logoWidth:
-                    txt_log.insert(tk.END, addLine(lang['msg3'] + dst_filepath))
-                    continue
-                if vH <= logoHeight:
-                    txt_log.insert(tk.END, addLine(lang['msg4'] + dst_filepath))
-                    continue
-                logo = mp.ImageClip(logo_filepath).set_duration(video.duration).set_pos(('right', 'bottom'))
-                final = mp.CompositeVideoClip([video, logo])
-                final.subclip(0).write_videofile(dst_filepath)
-                txt_log.insert(tk.END, addLine(lang['msg8'] + dst_filepath))
-            else:
-                img = Image.open(src_filepath)
-                imgWidth, imgHeight = img.size
+            logo_img = Image.open(logo_filepath)
 
-                if imgWidth <= logoWidth:
-                    txt_log.insert(tk.END, addLine(lang['msg5'] + src_filepath))
-                    continue
+            def scaleToImage(size_logo, size_img):
+                
+                new_size = size_logo
 
-                if imgHeight <= logoHeight:
-                    txt_log.insert(tk.END, addLine(lang['msg6'] + src_filepath))
-                    continue
+                for i in range(2):
+                    if size_logo[i] > size_img[i]:
+                        x = (size_img[i] - size_logo[i]) / size_logo[i]
+                        new_size = [math.floor(y - y * x) for y in new_size]
 
-                img.paste(logoImg, (imgWidth - logoWidth, imgHeight - logoHeight), logoImg)
-                img.save(dst_filepath)
-                txt_log.insert(tk.END, addLine(lang['msg7'] + dst_filepath))
+                return tuple(new_size)
+            
+            for file in files:
+                src_filepath = src_dir_path + '/' + file
+                dst_filepath = dst_dir_path + '/' + file
+                txt_log.insert(tk.END, addLine(lang['msg2'] + src_filepath))
 
-            pgr_bar['value'] += unit
-        
-        txt_log.insert(tk.END, addLine(lang['msg9'] + dst_dir_path))
-        txt_log.insert(tk.END, '--------------------------------\n')
+                if file.lower().endswith('.mp4'):
+                    video = mp.VideoFileClip(src_filepath)
+                    new_logo_size = scaleToImage(logo_img.size, video.size)
+                    limit_size = math.floor(min(video.size) * 0.2)
+                    m = min(new_logo_size)
+                    
+                    if m > limit_size:
+                        x = (m - limit_size) / m
+                        new_logo_size = tuple([math.floor(y - y * x) for y in new_logo_size])
+                    
+                    print(video.size, new_logo_size)
+                    
+                    logo = mp.ImageClip(np.array(logo_img.resize(new_logo_size, Image.ANTIALIAS))).set_duration(video.duration).set_pos(('right', 'bottom'))
+                    final = mp.CompositeVideoClip([video, logo], size=video.size).subclip(0)
+                    final.write_videofile(dst_filepath)
+                    final.close()
+                    logo.close()
+                    video.close()
+                    txt_log.insert(tk.END, addLine(lang['msg8'] + dst_filepath))
+                else:
+                    img = Image.open(src_filepath)
+                    new_logo_size = scaleToImage(logo_img.size, img.size)
+                    limit_size = math.floor(min(img.size) * 0.2)
+                    m = min(new_logo_size)
 
-    try :
+                    if m > limit_size:
+                        x = (m - limit_size) / m
+                        new_logo_size = tuple([math.floor(y - y * x) for y in new_logo_size])
+
+                    print(img.size, new_logo_size)
+
+                    scaled_logo_img = logo_img.resize(new_logo_size, Image.ANTIALIAS)
+                    img.paste(scaled_logo_img, [(a - new_logo_size[i]) for i, a in enumerate(img.size)], (scaled_logo_img if scaled_logo_img.mode == "RGBA" else None))
+                    img.save(dst_filepath, quality=100)
+                    scaled_logo_img.close()
+                    img.close()
+                    txt_log.insert(tk.END, addLine(lang['msg7'] + dst_filepath))
+                
+                pgr_bar['value'] += unit
+
+            logo_img.close()
+            txt_log.insert(tk.END, '\n')
+            txt_log.insert(tk.END, addLine(lang['msg9'] + dst_dir_path))
+            txt_log.insert(tk.END, '\n')
+            pgr_bar['value'] = 100
+        except Exception as e:
+            traceback.print_exc()
+            txt_log.insert(tk.END, addLine(lang['msg10']))
+
+    try:
         _thread.start_new_thread(convertMediaFiles, ())
     except Exception as e:
-        print(e)
+        traceback.print_exc()
+        txt_log.insert(tk.END, addLine(lang['msg10']))
         return
-
-    pgr_bar['value'] = 100
-    txt_log.insert(tk.END, addLine(u"{}".format(lang['msg9']) + dst_dir_path))
 
 
 root = tk.Tk()
@@ -150,9 +177,13 @@ def chooseLang(lg):
     global config
     global lang
     global widgets
+    global dst_dir_name
     lang = config['lang'][lg]
+    dst_dir_name = lang['dst_dir_name']
+
     for name, widget in widgets.items():
-        widget['text'] = lang[name]
+        if not isinstance(widget, tk.Label):
+            widget['text'] = lang[name]
 
 
 widgets = {
@@ -173,7 +204,7 @@ for _, widget in widgets.items():
     widget.pack(expand=True, padx=10, pady=10)
 
 
-pgr_bar = ttk.Progressbar(master=frm_main, orient=tk.HORIZONTAL, length=100, mode='determinate')
+pgr_bar = ttk.Progressbar(master=frm_main, orient=tk.HORIZONTAL, length=100, mode='determinate', value=0)
 pgr_bar.pack(expand=True, fill=tk.X, padx=10, pady=10)
 txt_log = tk.Text(master=frm_main, height=100)
 txt_log.pack(expand=True, fill=tk.X, padx=10, pady=10)

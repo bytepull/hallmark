@@ -16,7 +16,8 @@
       "msg6": "The heigh of the image is smaller than that of the logo: ",
       "msg7": "The image has been saved to: ",
       "msg8": "The video has been saved to: ",
-      "msg9": "Job is over. The directory where the trasformed files have been saved is: "
+      "msg9": "DONE. The directory where the trasformed files have been saved is: ",
+      "msg10": "Error found. Impossible to go on."
     },
     "it": {
       "dst_dir_name": "con_logo",
@@ -33,7 +34,8 @@
       "msg6": "L'altezza dell'immagine e' minore di quella del logo: ",
       "msg7": "L'immagine e' stata salvata in: ",
       "msg8": "Il video e' stato salvato in: ",
-      "msg9": "Lavoro terminato. La cartella dove i file con il logo sono stati salvati e': "
+      "msg9": "FINITO. La cartella dove i file con il logo sono stati salvati e': ",
+      "msg10": "Errore riscontrato. Impossibile procedere."
     }
   }
 }
